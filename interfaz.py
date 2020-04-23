@@ -19,7 +19,7 @@ esfuerzo=0
 deformacion=0
 
 
-#fig = plt.figure(figsize=(5,18))
+
 fig = plt.figure(figsize=(5,10))
 
 fig.facecolor=(.18, .31, .31)
@@ -55,8 +55,7 @@ def graficar():
                 #-------------------------------------------------------
                 if float(y)==111 or float(x)==111:
                     puerto.write('6'.encode())                     
-##                    chat_2.delete(1)
-##                    chat_2.insert(END, '{:.2f}'.format(float(y)))
+
                     ani.event_source.stop()
                     print("lectura: ",lectura)
                     f = open('datos.txt', 'w')
