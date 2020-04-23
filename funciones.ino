@@ -1,3 +1,99 @@
+int    pasos_motor = 200; //165
+//int    pasos_motor = 26900;
+int micro_segundos = 500;
+
+const int dirPin  = 7; //D11;    // DIR
+const int stepPin = 8; //D12;   // STEP
+int        enable = 9;
+
+char estado = 'e';
+float Kgf=0;
+
+int  boton_stop = 10;
+int     final_1 = 11;
+int     final_2 = 12;
+//------------------------------------------
+float kg_inicial=0;
+float constante= 0.0074444444;
+float deformacion=0;
+//-------------------------------------------
+
+void setup() 
+       {
+          Serial.begin(115200);
+          configuracion_celda();                      
+          pinMode(stepPin,OUTPUT); 
+          pinMode(dirPin,OUTPUT);
+          pinMode(enable,OUTPUT);
+          pinMode(final_1,INPUT);
+          pinMode(final_2,INPUT);
+          pinMode(boton_stop,INPUT);
+          
+        }// fin de:  void setup()
+   
+void loop() 
+   {
+            if(estado=='t')
+               {
+                 baja();
+                 while(1){digitalWrite(enable, HIGH);}
+               }          
+
+            if(estado=='c')
+               {
+                 corte();
+               }
+            
+            if(estado=='s')
+               {
+                  sube();
+               }
+                   
+            if(estado=='b')
+                   {
+                      baja();
+                   }
+                   
+            if(estado=='e') {digitalWrite(enable, HIGH);} // apagado
+
+            
+          if (digitalRead(boton_stop)==HIGH)
+             {       
+              estado='e';          
+             } 
+
+        else{
+              if(Serial.available())
+                   {
+                       switch(Serial.read())
+                              {                      
+                                 
+                                  case '1':                //corte                
+                                             estado='c';                                                                                                        
+                                             break; 
+                                  case '2':              
+                                             estado='t';                              
+                                             break; 
+                                  case '3':               
+                                             //estado='p';
+                                             break;  
+                                  case '4':              // sube
+                                             estado='s';                                    
+                                             break; 
+                                  case '5':              // baja
+                                             estado='b';                                     
+                                             break;                                                                                                                 
+                                  case '6':              
+                                             estado='e';                                                                 
+                                             break;                                                         
+        
+                             }// fin del switch                              
+                   } // fin de serial habilitado                  
+            }
+
+   } // fin de:  void loop()
+
+
 #include "HX711.h"
 #define SCK  A4  
 #define  DT  A5  
