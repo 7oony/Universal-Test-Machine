@@ -1,9 +1,9 @@
-int    pasos_motor = 200; //165
-//int    pasos_motor = 26900;
+int    pasos_motor = 200; 
+
 int micro_segundos = 500;
 
-const int dirPin  = 7; //D11;    // DIR
-const int stepPin = 8; //D12;   // STEP
+const int dirPin  = 7; 
+const int stepPin = 8; 
 int        enable = 9;
 
 char estado = 'e';
@@ -199,7 +199,7 @@ void corte()
                             deformacion=deformacion+constante;
                             
                             Serial.println( String(deformacion,9)+ String(" , ") + String(Kgf,9));
-                            //Serial.println(String(" kg_inicial:  ")+String(kg_inicial));
+                           
                                                                                                                                         
                            }// fin de while
                    
@@ -227,7 +227,7 @@ void corte()
                               medir_gramos();                                                                                         
                               deformacion=deformacion+constante;
                               Serial.println( String(deformacion,9)+ String(" , ") + String(Kgf,9));
-                              //Serial.println(String(" kg_inicial:  ")+String(kg_inicial));                              
+                                                          
                             }
 
                    digitalWrite(enable, HIGH);
