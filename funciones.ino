@@ -1,99 +1,3 @@
-int    pasos_motor = 200; 
-
-int micro_segundos = 500;
-
-const int dirPin  = 7; 
-const int stepPin = 8; 
-int        enable = 9;
-
-char estado = 'e';
-float Kgf=0;
-
-int  boton_stop = 10;
-int     final_1 = 11;
-int     final_2 = 12;
-//------------------------------------------
-float kg_inicial=0;
-float constante= 0.0074444444;
-float deformacion=0;
-//-------------------------------------------
-
-void setup() 
-       {
-          Serial.begin(115200);
-          configuracion_celda();                      
-          pinMode(stepPin,OUTPUT); 
-          pinMode(dirPin,OUTPUT);
-          pinMode(enable,OUTPUT);
-          pinMode(final_1,INPUT);
-          pinMode(final_2,INPUT);
-          pinMode(boton_stop,INPUT);
-          
-        }// fin de:  void setup()
-   
-void loop() 
-   {
-            if(estado=='t')
-               {
-                 baja();
-                 while(1){digitalWrite(enable, HIGH);}
-               }          
-
-            if(estado=='c')
-               {
-                 corte();
-               }
-            
-            if(estado=='s')
-               {
-                  sube();
-               }
-                   
-            if(estado=='b')
-                   {
-                      baja();
-                   }
-                   
-            if(estado=='e') {digitalWrite(enable, HIGH);} // apagado
-
-            
-          if (digitalRead(boton_stop)==HIGH)
-             {       
-              estado='e';          
-             } 
-
-        else{
-              if(Serial.available())
-                   {
-                       switch(Serial.read())
-                              {                      
-                                 
-                                  case '1':                //corte                
-                                             estado='c';                                                                                                        
-                                             break; 
-                                  case '2':              
-                                             estado='t';                              
-                                             break; 
-                                  case '3':               
-                                             //estado='p';
-                                             break;  
-                                  case '4':              // sube
-                                             estado='s';                                    
-                                             break; 
-                                  case '5':              // baja
-                                             estado='b';                                     
-                                             break;                                                                                                                 
-                                  case '6':              
-                                             estado='e';                                                                 
-                                             break;                                                         
-        
-                             }// fin del switch                              
-                   } // fin de serial habilitado                  
-            }
-
-   } // fin de:  void loop()
-
-
 #include "HX711.h"
 #define SCK  A4  
 #define  DT  A5  
@@ -111,17 +15,10 @@ void configuracion_celda()
        }
        
 
-
-
-
-
 void medir_gramos()
             {
               Kgf = abs(balanza.get_units(10)/1000); //  si se quiere la medida en gramos, hacer una division dentro de 1 en vez de 1000.                                          
             }
-
-
-
 
 
 
@@ -139,8 +36,7 @@ void baja()
             }
 
 
-            
-
+           
 void sube()
         {
             digitalWrite(enable, LOW);
@@ -156,23 +52,22 @@ void sube()
 
 
 
-
-
-
-
 void corte()
    {
-
+        // Apaga la máquina si se presiona el boton de paro
         if (digitalRead(boton_stop)==HIGH)
                                         {
                                         digitalWrite(enable, HIGH);
                                         estado='e';
                                         }
+        //sube la máquina hasta encontrar el valor indicado en el primer if, esto para tener seguridad de que la pieza ya esta sujetada
         sube();
         medir_gramos();   
         
          if(Kgf>=0.1)
-                 { 
+                 {
+                  // manda un 1 para indicar que la interfaz debe empezar  a imprimir los datos en pantalla
+                  // sale cuando empieza a disminuir los valores de la celda de carga
                   Serial.println("1");
                   while(1){
                             
@@ -188,20 +83,20 @@ void corte()
                             if(kg_inicial>=Kgf){
                                            Serial.println( String(deformacion,9)+ String(" , ") + String(Kgf,9));
                                            break;}                            
-                            //sube(); 
-                            baja();                                             
+                            sube();                                                                          
                             medir_gramos();
                             deformacion=deformacion+constante;
                             kg_inicial=Kgf;
-                            //sube();
-                            baja(); 
+                            sube();                            
                             medir_gramos();
                             deformacion=deformacion+constante;
                             
-                            Serial.println( String(deformacion,9)+ String(" , ") + String(Kgf,9));
-                           
+                            Serial.println( String(deformacion,9)+ String(" , ") + String(Kgf,9));                            
                                                                                                                                         
                            }// fin de while
+                           
+                   // sigur mandando datos hasta que se disminuye en un 10% del valor mas alto que alcanza en 
+                   // el ciclo anterior
                    
                    while(1)
                             {
@@ -222,14 +117,15 @@ void corte()
                                            Serial.println( String(deformacion,9)+ String(" , ") + String(Kgf,9));
                                            break;}                                
                               
-                              //sube();
-                              baja();
+                              sube();                          
                               medir_gramos();                                                                                         
                               deformacion=deformacion+constante;
                               Serial.println( String(deformacion,9)+ String(" , ") + String(Kgf,9));
-                                                          
+                                                           
                             }
 
+                   // apaga el modulo del stepper y envía 111 para indicarle a python que termine de mostrar datos 
+                    
                    digitalWrite(enable, HIGH);
                    deformacion=0;
                    int dato_stop=111;
@@ -244,9 +140,7 @@ void corte()
                             }
                  }
 
-    }      
-
-
+    } 
 
 
 
