@@ -8,34 +8,35 @@ import itertools
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from tkinter import ttk
 
-puerto  = serial.Serial(port='COM5', baudrate = 115200)
-#puerto  = serial.Serial(port='/dev/ttyUSB0', baudrate = 115200)
+
+puerto  = serial.Serial(port='/dev/ttyUSB0', baudrate = 115200)
 
    
-
+# borra los datos de la ultima prueba 
 f = open('datos.txt', 'w')
 f.close()   
 esfuerzo=0
 deformacion=0
 
 
-
+#configuracion de la grafica a mostrar
 fig = plt.figure(figsize=(5,10))
-
 fig.facecolor=(.18, .31, .31)
 fig.subplots_adjust(left=0.15, right=0.95)
 ax1 = fig.add_subplot(1,1,1)
 
 
 
-  
+# fucion que grafica los datos recibidos 
     
 def graficar():
 
     f = open('datos.txt', 'w')
     f.close()
 
-
+    # a la hora de entrar aca, se matiene leyendo datos continuamente tipo un while
+    # hasta que recibe el dato "111", con esto, sale y le pone stop a la grafica,
+    # no la cierra para poder hacer otra prueba sin necesidad de cerrar el programa
     def animate(i):
 
         lectura= puerto.readline().decode()
@@ -52,10 +53,9 @@ def graficar():
         for eachLine in dataArray:
             if len(eachLine)>1:
                 x,y = eachLine.split(' , ')
-                #-------------------------------------------------------
+                #----sale del ciclo---------------------------------------------------
                 if float(y)==111 or float(x)==111:
                     puerto.write('6'.encode())                     
-
                     ani.event_source.stop()
                     print("lectura: ",lectura)
                     f = open('datos.txt', 'w')
@@ -92,7 +92,7 @@ def graficar():
 
 
     try:
-        
+        # llama continuemente a la funcion que muestra la grafica
         ani = animation.FuncAnimation(fig, animate, interval=1,repeat = False)
         plt.show()
         
@@ -122,7 +122,7 @@ def graficar():
         pass
             
 
-#-------------------------------------------------------------------------
+#fuciones----------------------------------------
 def up():
     puerto.write('4'.encode())
       
@@ -153,13 +153,6 @@ def cort():
 
         
    
-
-
-
-#--------------------------------------------------------------------------        
- 
-
-
 def tensi():
     puerto.write('t'.encode())
     graficar()            
@@ -169,20 +162,23 @@ def compre():
     graficar()
 
 
-
-
 def reset():
     puerto.write('9'.encode())
     puerto.write('6'.encode()) 
+
+
+# configuracion de la ventana pricipal---------------------------------------------------------------
+# segun el boton presionado en la interfaz, como se muetra en la parte de abajo,
+# llama a una funcion especifica de la que se han definido al principo
+# cada una de las funciones solo manda una letra espeficica al arduino
+# y ya en el archivo "principal" ya elege que funcion realizar, mediante la letra o numero enviado
+# las partes llamadas chat, son los aparatados que muestran los datos numericos recibidos
     
 ventana = Tk()
 ventana.title("Esfuerzo Mecanico")
 ventana.configure(bg="#662233") 
 ventana.resizable(width=False, height=False)
 ventana.geometry("250x440+545+0") 
-
-#---------------------------------------------------
-
 
 
 texto_compresion = Label(ventana, text="CORTE", font=("Helvetica", 15), bg="blue"  ,fg="white")
@@ -214,7 +210,7 @@ chat_2.place(x=50, y=360)
 chat_2.insert(0, "")
 
 
-#----------------------------------------------------
+
 texto_compresion = Label(ventana, text="AJUSTE", font=("Helvetica", 15), bg="#662233" ,fg="white")
 texto_compresion.place(x=170, y= 5)
 
@@ -227,7 +223,6 @@ boton_b.place(x=190, y=110)
 
 boton_r= Button(ventana ,text = "Reset", font=("Helvetica", 13), command=reset ,bg="black",fg="white")
 boton_r.place(x=180, y=160)
-#----------------------------------------------------
 
 
 ventana.mainloop()
